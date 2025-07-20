@@ -103,7 +103,7 @@ def set_default_based_on_type():
     return set_defaults_
 
 
-CONFIG_SCHEMA = number.NUMBER_SCHEMA.extend(
+CONFIG_SCHEMA = number.number_schema(
     {
         cv.GenerateID(): cv.declare_id(TrumaNumber),
         cv.GenerateID(CONF_TRUMA_INETBOX_ID): cv.use_id(TrumaINetBoxApp),
