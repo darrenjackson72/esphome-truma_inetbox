@@ -28,7 +28,7 @@ def set_default_based_on_type():
     return set_defaults_
 
 
-CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
+CONFIG_SCHEMA = climate.climate_schema.extend(
     {
         cv.GenerateID(): cv.declare_id(TrumaClimate),
         cv.GenerateID(CONF_TRUMA_INETBOX_ID): cv.use_id(TrumaINetBoxApp),
