@@ -63,7 +63,7 @@ def set_default_based_on_type():
     return set_defaults_
 
 
-CONFIG_SCHEMA = select.SELECT_SCHEMA.extend(
+CONFIG_SCHEMA = select.select_schema.extend(
     {
         cv.GenerateID(): cv.declare_id(TrumaSelect),
         cv.GenerateID(CONF_TRUMA_INETBOX_ID): cv.use_id(TrumaINetBoxApp),
