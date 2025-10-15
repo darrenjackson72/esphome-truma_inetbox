@@ -4,13 +4,14 @@
 #include "driver/uart.h"
 #include "soc/uart_struct.h"
 #include "soc/uart_reg.h"
+
 #ifdef CUSTOM_ESPHOME_UART
 #include "esphome/components/uart/truma_uart_component_esp32_arduino.h"
 #define ESPHOME_UART uart::truma_ESP32ArduinoUARTComponent
 #else
+#include "esphome/components/uart/uart_component_esp32_arduino.h"
 #define ESPHOME_UART uart::ESP32ArduinoUARTComponent
 #endif // CUSTOM_ESPHOME_UART
-#include "esphome/components/uart/uart_component_esp32_arduino.h"
 
 namespace esphome {
 namespace truma_inetbox {
