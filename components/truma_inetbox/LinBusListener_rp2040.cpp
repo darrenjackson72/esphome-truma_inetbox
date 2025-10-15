@@ -1,13 +1,15 @@
 #ifdef USE_RP2040
 #include "LinBusListener.h"
 #include "esphome/core/log.h"
+
 #ifdef CUSTOM_ESPHOME_UART
 #include "esphome/components/uart/truma_uart_component_rp2040.h"
 #define ESPHOME_UART uart::truma_RP2040UartComponent
 #else
+#include "esphome/components/uart/uart_component_rp2040.h"
 #define ESPHOME_UART uart::RP2040UartComponent
 #endif // CUSTOM_ESPHOME_UART
-#include "esphome/components/uart/uart_component_rp2040.h"
+
 #include <SerialUART.h>
 
 // Instance 1 for UART port 0
