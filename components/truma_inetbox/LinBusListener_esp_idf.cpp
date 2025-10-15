@@ -2,13 +2,14 @@
 #include "LinBusListener.h"
 #include "esphome/core/log.h"
 #include "soc/uart_reg.h"
+
 #ifdef CUSTOM_ESPHOME_UART
 #include "esphome/components/uart/truma_uart_component_esp_idf.h"
 #define ESPHOME_UART uart::truma_IDFUARTComponent
 #else
+#include "esphome/components/uart/uart_component_esp_idf.h"
 #define ESPHOME_UART uart::IDFUARTComponent
 #endif // CUSTOM_ESPHOME_UART
-#include "esphome/components/uart/uart_component_esp_idf.h"
 
 namespace esphome {
 namespace truma_inetbox {
