@@ -4,7 +4,14 @@
 #include "driver/uart.h"
 #include "soc/uart_struct.h"
 #include "soc/uart_reg.h"
+
+#ifdef CUSTOM_ESPHOME_UART
 #include "esphome/components/uart/truma_uart_component_esp32_arduino.h"
+#define ESPHOME_UART uart::truma_ESP32ArduinoUARTComponent
+#else
+#include "esphome/components/uart/uart_component_esp32_arduino.h"
+#define ESPHOME_UART uart::ESP32ArduinoUARTComponent
+#endif // CUSTOM_ESPHOME_UART
 
 namespace esphome {
 namespace truma_inetbox {
@@ -14,7 +21,7 @@ static const char *const TAG = "truma_inetbox.LinBusListener";
 #define QUEUE_WAIT_BLOCKING (portTickType) portMAX_DELAY
 
 void LinBusListener::setup_framework() {
-  auto uartComp = static_cast<uart::truma_ESP32ArduinoUARTComponent *>(this->parent_);
+  auto uartComp = static_cast<ESPHOME_UART *>(this->parent_);
 
   auto uart_num = uartComp->get_hw_serial_number();
   auto hw_serial = uartComp->get_hw_serial();
@@ -75,5 +82,6 @@ void LinBusListener::eventTask_(void *args) {
 }  // namespace esphome
 
 #undef QUEUE_WAIT_BLOCKING
+#undef ESPHOME_UART
 
 #endif  // USE_ESP32_FRAMEWORK_ARDUINO
