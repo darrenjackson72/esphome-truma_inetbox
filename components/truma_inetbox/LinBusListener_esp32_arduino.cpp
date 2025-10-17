@@ -9,7 +9,7 @@
 #include "esphome/components/uart/truma_uart_component_esp32_arduino.h"
 #define ESPHOME_UART uart::truma_ESP32ArduinoUARTComponent
 #else
-#include "uart_component_esp32_arduino.h"
+#include "esphome/components/uart/uart_component_esp32_arduino.h"
 #define ESPHOME_UART uart::ESP32ArduinoUARTComponent
 #endif // CUSTOM_ESPHOME_UART
 
