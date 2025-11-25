@@ -129,7 +129,7 @@ void TrumaRoomClimate::control(const climate::ClimateCall &call) {
 
 climate::ClimateTraits TrumaRoomClimate::traits() {
   auto traits = climate::ClimateTraits();
-  traits.add_supported_feature(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE);
+  traits.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE);
   traits.set_supported_modes({climate::CLIMATE_MODE_OFF, climate::CLIMATE_MODE_HEAT});
   traits.set_supported_fan_modes({{
       climate::CLIMATE_FAN_OFF,
