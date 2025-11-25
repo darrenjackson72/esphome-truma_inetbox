@@ -42,9 +42,8 @@ void TrumaWaterClimate::control(const climate::ClimateCall &call) {
 }
 
 climate::ClimateTraits TrumaWaterClimate::traits() {
-  // The capabilities of the climate device
   auto traits = climate::ClimateTraits();
-  traits.set_supports_current_temperature(true);
+  traits.set_supported_features(climate::CLIMATE_FEATURE_CURRENT_TEMPERATURE);
   traits.set_supported_modes({climate::CLIMATE_MODE_OFF, climate::CLIMATE_MODE_HEAT});
   traits.set_visual_min_temperature(40);
   traits.set_visual_max_temperature(80);
