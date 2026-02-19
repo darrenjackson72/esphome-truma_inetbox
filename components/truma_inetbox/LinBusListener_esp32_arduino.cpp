@@ -4,21 +4,20 @@
 #include "driver/uart.h"
 #include "soc/uart_struct.h"
 #include "soc/uart_reg.h"
-
 #ifdef CUSTOM_ESPHOME_UART
 #include "esphome/components/uart/truma_uart_component_esp32_arduino.h"
 #define ESPHOME_UART uart::truma_ESP32ArduinoUARTComponent
 #else
-#include "esphome/components/uart/uart_component_esp32_arduino.h"
 #define ESPHOME_UART uart::ESP32ArduinoUARTComponent
 #endif // CUSTOM_ESPHOME_UART
+#include "esphome/components/uart/uart_component_esp32_arduino.h"
 
 namespace esphome {
 namespace truma_inetbox {
 
 static const char *const TAG = "truma_inetbox.LinBusListener";
 
-#define QUEUE_WAIT_BLOCKING (portTickType) portMAX_DELAY
+#define QUEUE_WAIT_BLOCKING (TickType_t) portMAX_DELAY
 
 void LinBusListener::setup_framework() {
   auto uartComp = static_cast<ESPHOME_UART *>(this->parent_);
@@ -40,7 +39,7 @@ void LinBusListener::setup_framework() {
   uart_intr.rx_timeout_thresh =
       10;  // UART_TOUT_THRESH_DEFAULT,  //10 works well for my short messages I need send/receive
   uart_intr.txfifo_empty_intr_thresh = 10;  // UART_EMPTY_THRESH_DEFAULT
-  uart_intr_config((uart_port_t) uart_num, &uart_intr);
+  uart_intr_config(uart_num, &uart_intr);
 
   hw_serial->onReceive([this]() { this->onReceive_(); }, false);
   hw_serial->onReceiveError([this](hardwareSerial_error_t val) {
