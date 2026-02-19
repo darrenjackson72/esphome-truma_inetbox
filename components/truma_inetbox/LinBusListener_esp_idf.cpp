@@ -43,6 +43,7 @@ void LinBusListener::setup_framework() {
   }
 
   if (uart_num == (uart_port_t) -1) {
+    this->setup_framework_status_ = "ERROR: no UART found at " + std::to_string(target_baud) + " baud";
     ESP_LOGE(TAG, "Could not find a UART port matching %" PRIu32 " baud - LIN bus will not work!", target_baud);
     return;
   }
@@ -66,6 +67,7 @@ void LinBusListener::setup_framework() {
                             &this->uartEventQueue_,
                             0);    // interrupt flags
   if (err != ESP_OK) {
+    this->setup_framework_status_ = std::string("ERROR: uart_driver_install failed: ") + esp_err_to_name(err);
     ESP_LOGE(TAG, "uart_driver_install(UART%d) failed: %s", (int) uart_num, esp_err_to_name(err));
     return;
   }
@@ -106,6 +108,7 @@ void LinBusListener::setup_framework() {
   }
 
   ESP_LOGI(TAG, "LIN bus driver installed on UART%d with event queue", (int) uart_num);
+  this->setup_framework_status_ = "OK: driver on UART" + std::to_string((int) uart_num);
 
   // -------------------------------------------------------------------------
   // UART event task - receives hardware UART events and drives LIN parsing
