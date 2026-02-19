@@ -7,6 +7,7 @@
 #ifdef USE_ESP32
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
+#include <freertos/queue.h>
 #endif  // USE_ESP32
 #ifdef USE_RP2040
 #include <hardware/uart.h>
@@ -136,11 +137,11 @@ class LinBusListener : public PollingComponent, public uart::UARTDevice {
   TaskHandle_t eventTaskHandle_;
   static void eventTask_(void *args);
 #endif  // USE_ESP32
-#ifdef USE_ESP32_FRAMEWORK_ESP_IDF
+#if defined(USE_ESP32) && !defined(USE_ESP32_FRAMEWORK_ARDUINO)
   TaskHandle_t uartEventTaskHandle_;
   static void uartEventTask_(void *args);
   QueueHandle_t uartEventQueue_{nullptr};  // UART driver event queue (owned by LinBusListener)
-#endif  // USE_ESP32_FRAMEWORK_ESP_IDF
+#endif  // USE_ESP32 && !USE_ESP32_FRAMEWORK_ARDUINO
 #ifdef USE_RP2040
   uint8_t uart_number_ = 0;
   uart_inst_t *uart_ = nullptr;
