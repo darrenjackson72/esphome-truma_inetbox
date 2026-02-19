@@ -1,4 +1,4 @@
-#ifdef USE_ESP32_FRAMEWORK_ESP_IDF
+#if defined(USE_ESP32) && !defined(USE_ESP32_FRAMEWORK_ARDUINO)
 #include "LinBusListener.h"
 #include "esphome/core/log.h"
 #include "soc/uart_reg.h"
@@ -175,4 +175,4 @@ void LinBusListener::eventTask_(void *args) {
 #undef QUEUE_WAIT_BLOCKING
 #undef ESPHOME_UART
 
-#endif  // USE_ESP32_FRAMEWORK_ESP_IDF
+#endif  // USE_ESP32 && !USE_ESP32_FRAMEWORK_ARDUINO
