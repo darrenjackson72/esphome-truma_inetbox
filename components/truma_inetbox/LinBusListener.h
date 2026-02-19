@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include "LinBusLog.h"
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
@@ -116,6 +117,7 @@ class LinBusListener : public PollingComponent, public uart::UARTDevice {
   void read_lin_frame_();
   void clear_uart_buffer_();
   void setup_framework();
+  std::string setup_framework_status_{"not called"};
 
   uint8_t lin_msg_static_queue_storage[TRUMA_MSG_QUEUE_LENGTH * sizeof(QUEUE_LIN_MSG)];
   StaticQueue_t lin_msg_static_queue_;
