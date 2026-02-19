@@ -112,11 +112,11 @@ void LinBusListener::setup_framework() {
   // -------------------------------------------------------------------------
   xTaskCreatePinnedToCore(LinBusListener::uartEventTask_,
                           "uart_event_task",
-                          ARDUINO_SERIAL_EVENT_TASK_STACK_SIZE,
+                          4096,
                           this,
                           24,
                           &this->uartEventTaskHandle_,
-                          ARDUINO_SERIAL_EVENT_TASK_RUNNING_CORE);
+                          tskNO_AFFINITY);
 
   if (this->uartEventTaskHandle_ == NULL) {
     ESP_LOGE(TAG, "UART%d event task failed to create!", (int) uart_num);
@@ -129,11 +129,11 @@ void LinBusListener::setup_framework() {
   // -------------------------------------------------------------------------
   xTaskCreatePinnedToCore(LinBusListener::eventTask_,
                           "lin_event_task",
-                          ARDUINO_SERIAL_EVENT_TASK_STACK_SIZE,
+                          4096,
                           this,
                           2,
                           &this->eventTaskHandle_,
-                          ARDUINO_SERIAL_EVENT_TASK_RUNNING_CORE);
+                          tskNO_AFFINITY);
 
   if (this->eventTaskHandle_ == NULL) {
     ESP_LOGE(TAG, "LIN message task failed to create!");
