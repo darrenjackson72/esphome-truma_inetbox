@@ -119,7 +119,7 @@ void LinBusListener::setup_framework() {
                           this,
                           24,
                           &this->uartEventTaskHandle_,
-                          tskNO_AFFINITY);
+                          1);  // pin to app core (core 1) for deterministic LIN timing
 
   if (this->uartEventTaskHandle_ == NULL) {
     ESP_LOGE(TAG, "UART%d event task failed to create!", (int) uart_num);
@@ -136,7 +136,7 @@ void LinBusListener::setup_framework() {
                           this,
                           2,
                           &this->eventTaskHandle_,
-                          tskNO_AFFINITY);
+                          1);  // pin to app core (core 1) for deterministic LIN timing
 
   if (this->eventTaskHandle_ == NULL) {
     ESP_LOGE(TAG, "LIN message task failed to create!");
