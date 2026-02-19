@@ -118,7 +118,7 @@ void LinBusListener::uartEventTask_(void *args) {
 
   for (;;) {
     // Block until a UART driver event arrives on OUR event queue
-    // (uartEventQueue_ is now owned by LinBusListener, not ESPHome)
+    // (uartEventQueue_ is a LinBusListener member, owned by us not ESPHome)
     if (xQueueReceive(instance->uartEventQueue_, (void *) &event, QUEUE_WAIT_BLOCKING)) {
       if (event.type == UART_DATA && instance->available() > 0) {
         instance->onReceive_();
