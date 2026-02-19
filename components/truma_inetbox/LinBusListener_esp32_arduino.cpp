@@ -2,10 +2,7 @@
 
 #include "LinBusListener.h"
 #include "esphome/core/log.h"
-
-// Modern ESPHome UART include
 #include "esphome/components/uart/uart_component.h"
-using esphome::uart::UARTComponent;
 
 namespace esphome {
 namespace truma_inetbox {
@@ -15,51 +12,19 @@ static const char *const TAG = "truma_inetbox.LinBusListener";
 #define QUEUE_WAIT_BLOCKING (TickType_t) portMAX_DELAY
 
 /*
- * Modern Arduino HAL access:
- *
- * UARTComponent -> exposes:
- *   - write_array()
- *   - flush()
- *   - read_byte()
- *   - available()
- *   - get_uart()  -> returns HardwareSerial* for Arduino
+ * Modern ESPHome UART backend for Arduino:
+ * - No hardware serial callbacks
+ * - No direct ESP-IDF uart_intr_config()
+ * - Polling-based LIN frame processing
+ * - Compatible with ESPHome 2026 unified UART API
  */
 
 void LinBusListener::setup_framework() {
-  auto *uart = static_cast<UARTComponent *>(this->parent_);
-
-  // Access Arduino's HardwareSerial
-  HardwareSerial *hw = uart->get_uart();
-
-  if (hw == nullptr) {
-    ESP_LOGE(TAG, "UARTComponent returned null HardwareSerial pointer!");
-    return;
-  }
-
-  // -------------------------
-  // Register Arduino callbacks
-  // -------------------------
-
-  // On receive callback
-  hw->onReceive(this {
-    this->onReceive_();
-  }, false);
-
-  // UART error callback
-  hw->onReceiveError([this](hardwareSerial_error_t err) {
-    this->clear_uart_buffer_();
-
-    if (err == UART_BREAK_ERROR) {
-      if (this->current_state_ != READ_STATE_SYNC) {
-        this->current_state_ = READ_STATE_BREAK;
-      }
-    }
-  });
-
-  // -------------------------
-  // Create event-processing task
-  // -------------------------
-
+  // No Arduino-specific setup needed.
+  // The unified UARTComponent handles everything safely.
+  ESP_LOGI(TAG, "Using polling-based LIN backend (Arduino safe)");
+  
+  // Create the event task that polls the UART
   xTaskCreatePinnedToCore(
       LinBusListener::eventTask_,
       "lin_event_task",
@@ -76,8 +41,16 @@ void LinBusListener::setup_framework() {
 
 void LinBusListener::eventTask_(void *arg) {
   auto *inst = reinterpret_cast<LinBusListener *>(arg);
+
   for (;;) {
+    // Poll UART for new LIN data
+    inst->onReceive_();
+
+    // Process queued LIN messages
     inst->process_lin_msg_queue(QUEUE_WAIT_BLOCKING);
+
+    // Yield briefly to avoid starving other tasks
+    vTaskDelay(1);
   }
 }
 
