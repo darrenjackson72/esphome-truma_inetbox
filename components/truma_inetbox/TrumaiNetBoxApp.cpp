@@ -87,15 +87,25 @@ void TrumaiNetBoxApp::lin_reset_device() {
 
 bool TrumaiNetBoxApp::answer_lin_order_(const u_int8_t pid) {
   // Alive message
-  if (pid == LIN_PID_TRUMA_INET_BOX) {
-    std::array<u_int8_t, 8> response = this->lin_empty_response_;
+if (pid == LIN_PID_TRUMA_INET_BOX) {
 
-    if (this->updates_to_send_.empty() && !this->has_update_to_submit_()) {
-      response[0] = 0xFE;
-    }
-    this->write_lin_answer_(response.data(), (u_int8_t) sizeof(response));
+  // Send multiple queued updates if available
+  if (!this->updates_to_send_.empty()) {
+    auto update_to_send_ = this->updates_to_send_.front();
+    this->updates_to_send_.pop();
+    this->write_lin_answer_(update_to_send_.data(), (uint8_t) update_to_send_.size());
     return true;
   }
+
+  std::array<uint8_t, 8> response = this->lin_empty_response_;
+
+  if (!this->has_update_to_submit_()) {
+    response[0] = 0xFE;
+  }
+
+  this->write_lin_answer_(response.data(), (uint8_t) sizeof(response));
+  return true;
+}
   return LinBusProtocol::answer_lin_order_(pid);
 }
 
