@@ -382,7 +382,7 @@ bool TrumaiNetBoxApp::has_update_to_submit_() {
   } else if (this->init_recieved_ == 0) {
     auto init_wait_time = micros() - this->init_requested_;
     // it has been 5 seconds and i am still awaiting the init data.
-    if (init_wait_time > 1000 * 1000 * 5) {
+    if (init_wait_time > 1000 * 1000 * 1) {
       // ESP_LOGD(TAG, "Requesting initial data again.");
       this->init_requested_ = micros();
       return true;
@@ -395,7 +395,7 @@ bool TrumaiNetBoxApp::has_update_to_submit_() {
       return true;
     }
     auto update_wait_time = micros() - this->update_time_;
-    if (update_wait_time > 1000 * 1000 * 5) {
+    if (update_wait_time > 1000 * 1000 * 1) {
       // ESP_LOGD(TAG, "Notify CP Plus again I still got updates.");
       this->update_time_ = micros();
       return true;
