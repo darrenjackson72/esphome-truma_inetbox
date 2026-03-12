@@ -38,33 +38,60 @@ void TrumaRoomClimate::dump_config() {
 
 void TrumaRoomClimate::control(const climate::ClimateCall &call) {
 
-  // Temperature change
-  if (call.get_target_temperature().has_value() && !call.get_fan_mode().has_value()) {
-    float temp = roundf(*call.get_target_temperature());
+// Temperature change
+if (call.get_target_temperature().has_value() && !call.get_fan_mode().has_value()) {
 
-    // Send command multiple times to ensure LIN slot capture
-    for (int i = 0; i < 3; i++) {
-      this->parent_->get_heater()->action_heater_room(static_cast<uint8_t>(temp));
-    }
+  float temp = roundf(*call.get_target_temperature());
+
+  // Send command multiple times to ensure LIN slot capture
+  for (int i = 0; i < 3; i++) {
+    this->parent_->get_heater()->action_heater_room(static_cast<uint8_t>(temp));
   }
 
-  // Mode change
-  if (call.get_mode().has_value()) {
-    climate::ClimateMode mode = *call.get_mode();
-    auto status_heater = this->parent_->get_heater()->get_status();
+  // Optimistic update so HA updates instantly
+  this->target_temperature = temp;
 
-    switch (mode) {
-      case climate::CLIMATE_MODE_HEAT:
-        if (status_heater->target_temp_room == TargetTemp::TARGET_TEMP_OFF) {
-          this->parent_->get_heater()->action_heater_room(5);
-        }
-        break;
-
-      default:
-        this->parent_->get_heater()->action_heater_room(0);
-        break;
-    }
+  if (temp > 0) {
+    this->mode = climate::CLIMATE_MODE_HEAT;
+  } else {
+    this->mode = climate::CLIMATE_MODE_OFF;
   }
+
+  this->publish_state();
+}
+
+if (call.get_mode().has_value()) {
+
+  climate::ClimateMode mode = *call.get_mode();
+  auto status_heater = this->parent_->get_heater()->get_status();
+
+  switch (mode) {
+
+    case climate::CLIMATE_MODE_HEAT:
+      if (status_heater->target_temp_room == TargetTemp::TARGET_TEMP_OFF) {
+
+        this->parent_->get_heater()->action_heater_room(5);
+
+        // optimistic update
+        this->mode = climate::CLIMATE_MODE_HEAT;
+        this->target_temperature = 5;
+        this->publish_state();
+      }
+      break;
+
+    default:
+
+      // send OFF command
+      this->parent_->get_heater()->action_heater_room(0);
+
+      // optimistic update
+      this->mode = climate::CLIMATE_MODE_OFF;
+      this->target_temperature = 0;
+      this->publish_state();
+
+      break;
+  }
+}
 
   // Fan mode change
   if (call.get_fan_mode().has_value()) {
