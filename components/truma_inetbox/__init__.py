@@ -229,19 +229,19 @@ FINAL_VALIDATE_SCHEMA = cv.All(
 )
 
 async def to_code(config):
-    if CORE.is_esp32:
-        uart.request_wake_loop_on_rx()
-
     var = cg.new_Pvariable(config[CONF_ID])
+
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
-    if (CONF_TIME_ID in config):
+
+    if CONF_TIME_ID in config:
         time_ = await cg.get_variable(config[CONF_TIME_ID])
         cg.add(var.set_time(time_))
 
     if CONF_LIN_CHECKSUM in config:
         cg.add(var.set_lin_checksum(
-            CONF_SUPPORTED_LIN_CHECKSUM[config[CONF_LIN_CHECKSUM]]))
+            CONF_SUPPORTED_LIN_CHECKSUM[config[CONF_LIN_CHECKSUM]]
+        ))
 
     if CONF_CS_PIN in config:
         pin = await cg.gpio_pin_expression(config[CONF_CS_PIN])
