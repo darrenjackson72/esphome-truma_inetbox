@@ -289,56 +289,70 @@ TimerActivateAction = truma_inetbox_ns.class_(
     "TimerActivateAction", automation.Action)
 WriteTimeAction = truma_inetbox_ns.class_("WriteTimeAction", automation.Action)
 
+
+# FIX: ESPHome 2026.x tightened TemplatableFn constructor constraints.
+# Enum class values passed through cg.templatable generate lambdas whose
+# return type is deduced as the enum class, which no longer implicitly
+# converts to the underlying integer type. Wrapping in RawExpression with
+# an explicit cast forces the lambda return type to match the TEMPLATABLE_VALUE
+# primitive type declared in automation.h.
+def _cast8(val):
+    return cg.RawExpression(f"(uint8_t)({val})")
+
+def _cast16(val):
+    return cg.RawExpression(f"(uint16_t)({val})")
+
+
 # `EnergyMix` is a enum class and not a namespace but it works.
 EnergyMix_dummy_ns = truma_inetbox_ns.namespace("EnergyMix")
 
 CONF_SUPPORTED_ENERGY_MIX = {
-    "NONE": EnergyMix_dummy_ns.ENERGY_MIX_NONE,
-    "GAS": EnergyMix_dummy_ns.ENERGY_MIX_GAS,
-    "DIESEL": EnergyMix_dummy_ns.ENERGY_MIX_DIESEL,
-    "ELECTRICITY": EnergyMix_dummy_ns.ENERGY_MIX_ELECTRICITY,
-    "MIX": EnergyMix_dummy_ns.ENERGY_MIX_MIX,
+    "NONE":        _cast8(EnergyMix_dummy_ns.ENERGY_MIX_NONE),
+    "GAS":         _cast8(EnergyMix_dummy_ns.ENERGY_MIX_GAS),
+    "DIESEL":      _cast8(EnergyMix_dummy_ns.ENERGY_MIX_DIESEL),
+    "ELECTRICITY": _cast8(EnergyMix_dummy_ns.ENERGY_MIX_ELECTRICITY),
+    "MIX":         _cast8(EnergyMix_dummy_ns.ENERGY_MIX_MIX),
 }
 
 # `ElectricPowerLevel` is a enum class and not a namespace but it works.
 ElectricPowerLevel_dummy_ns = truma_inetbox_ns.namespace("ElectricPowerLevel")
 
 CONF_SUPPORTED_ELECTRIC_POWER_LEVEL = {
-    "0": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_0,
-    "0W": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_0,
-    "0 W": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_0,
-    "900": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_900,
-    "900W": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_900,
-    "900 W": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_900,
-    "1800": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800,
-    "1800W": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800,
-    "1800 W": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800,
-    "1.8kW": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800,
-    "1,8kW": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800,
-    "1.8 kW": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800,
-    "1,8 kW": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800,
+    "0":      _cast16(ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_0),
+    "0W":     _cast16(ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_0),
+    "0 W":    _cast16(ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_0),
+    "900":    _cast16(ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_900),
+    "900W":   _cast16(ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_900),
+    "900 W":  _cast16(ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_900),
+    "1800":   _cast16(ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800),
+    "1800W":  _cast16(ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800),
+    "1800 W": _cast16(ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800),
+    "1.8kW":  _cast16(ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800),
+    "1,8kW":  _cast16(ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800),
+    "1.8 kW": _cast16(ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800),
+    "1,8 kW": _cast16(ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800),
 }
 
 # `HeatingMode` is a enum class and not a namespace but it works.
 HeatingMode_dummy_ns = truma_inetbox_ns.namespace("HeatingMode")
 
 CONF_SUPPORTED_HEATING_MODE = {
-    "OFF": HeatingMode_dummy_ns.HEATING_MODE_OFF,
-    "ECO": HeatingMode_dummy_ns.HEATING_MODE_ECO,
-    "NIGHT": HeatingMode_dummy_ns.HEATING_MODE_VARIO_HEAT_NIGHT,
-    "AUTO": HeatingMode_dummy_ns.HEATING_MODE_VARIO_HEAT_AUTO,
-    "HIGH": HeatingMode_dummy_ns.HEATING_MODE_HIGH,
-    "BOOST": HeatingMode_dummy_ns.HEATING_MODE_BOOST,
+    "OFF":   _cast8(HeatingMode_dummy_ns.HEATING_MODE_OFF),
+    "ECO":   _cast8(HeatingMode_dummy_ns.HEATING_MODE_ECO),
+    "NIGHT": _cast8(HeatingMode_dummy_ns.HEATING_MODE_VARIO_HEAT_NIGHT),
+    "AUTO":  _cast8(HeatingMode_dummy_ns.HEATING_MODE_VARIO_HEAT_AUTO),
+    "HIGH":  _cast8(HeatingMode_dummy_ns.HEATING_MODE_HIGH),
+    "BOOST": _cast8(HeatingMode_dummy_ns.HEATING_MODE_BOOST),
 }
 
 # `TargetTemp` is a enum class and not a namespace but it works.
 TargetTemp_dummy_ns = truma_inetbox_ns.namespace("TargetTemp")
 
 CONF_SUPPORTED_WATER_TEMPERATURE = {
-    "OFF": TargetTemp_dummy_ns.TARGET_TEMP_OFF,
-    "ECO": TargetTemp_dummy_ns.TARGET_TEMP_WATER_ECO,
-    "HIGH": TargetTemp_dummy_ns.TARGET_TEMP_WATER_HIGH,
-    "BOOST": TargetTemp_dummy_ns.TARGET_TEMP_WATER_BOOST,
+    "OFF":   _cast16(TargetTemp_dummy_ns.TARGET_TEMP_OFF),
+    "ECO":   _cast16(TargetTemp_dummy_ns.TARGET_TEMP_WATER_ECO),
+    "HIGH":  _cast16(TargetTemp_dummy_ns.TARGET_TEMP_WATER_HIGH),
+    "BOOST": _cast16(TargetTemp_dummy_ns.TARGET_TEMP_WATER_BOOST),
 }
 
 
@@ -362,7 +376,7 @@ async def truma_inetbox_heater_set_target_room_temperature_to_code(config, actio
     template_ = await cg.templatable(config[CONF_TEMPERATURE], args, cg.uint8)
     cg.add(var.set_temperature(template_))
 
-    template_ = await cg.templatable(config[CONF_HEATING_MODE], args, cg.uint16)
+    template_ = await cg.templatable(config[CONF_HEATING_MODE], args, cg.uint8)  # FIX: was cg.uint16
     cg.add(var.set_heating_mode(template_))
 
     return var
@@ -510,7 +524,6 @@ async def truma_inetbox_timer_disable_to_code(config, action_id, template_arg, a
             cv.Optional(CONF_WATER_TEMPERATURE, 0): cv.templatable(cv.int_range(min=0, max=80)),
             cv.Optional(CONF_ENERGY_MIX, "NONE"): cv.templatable(cv.enum(CONF_SUPPORTED_ENERGY_MIX, upper=True)),
             cv.Optional(CONF_WATT, 0): cv.templatable(cv.enum(CONF_SUPPORTED_ELECTRIC_POWER_LEVEL, upper=True)),
-
         }
     ),
     synchronous=False,
@@ -528,7 +541,7 @@ async def truma_inetbox_timer_activate_to_code(config, action_id, template_arg, 
     template_ = await cg.templatable(config[CONF_ROOM_TEMPERATURE], args, cg.uint8)
     cg.add(var.set_room_temperature(template_))
 
-    template_ = await cg.templatable(config[CONF_HEATING_MODE], args, cg.uint16)
+    template_ = await cg.templatable(config[CONF_HEATING_MODE], args, cg.uint8)  # FIX: was cg.uint16
     cg.add(var.set_heating_mode(template_))
 
     template_ = await cg.templatable(config[CONF_WATER_TEMPERATURE], args, cg.uint8)
@@ -539,6 +552,7 @@ async def truma_inetbox_timer_activate_to_code(config, action_id, template_arg, 
 
     template_ = await cg.templatable(config[CONF_WATT], args, cg.uint16)
     cg.add(var.set_watt(template_))
+
     return var
 
 
