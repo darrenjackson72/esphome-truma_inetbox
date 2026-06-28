@@ -38,11 +38,11 @@ void LinBusListener::setup_framework() {
   // Creating UART event Task
   xTaskCreatePinnedToCore(LinBusListener::uartEventTask_,
                           "uart_event_task",                      // name
-                          ARDUINO_SERIAL_EVENT_TASK_STACK_SIZE,   // stack size (in words)
+                          8192,   // stack size (in words)
                           this,                                   // input params
                           24,                                     // priority
                           &this->uartEventTaskHandle_,            // handle
-                          ARDUINO_SERIAL_EVENT_TASK_RUNNING_CORE  // core
+                          1  // core
   );
   if (this->uartEventTaskHandle_ == NULL) {
     ESP_LOGE(TAG, " -- UART%d Event Task not created!", uart_num);
@@ -51,11 +51,11 @@ void LinBusListener::setup_framework() {
   // Creating LIN msg event Task
   xTaskCreatePinnedToCore(LinBusListener::eventTask_,
                           "lin_event_task",                       // name
-                          ARDUINO_SERIAL_EVENT_TASK_STACK_SIZE,   // stack size (in words)
+                          8192,   // stack size (in words)
                           this,                                   // input params
                           2,                                      // priority
                           &this->eventTaskHandle_,                // handle
-                          ARDUINO_SERIAL_EVENT_TASK_RUNNING_CORE  // core
+                          1  // core
   );
 
   if (this->eventTaskHandle_ == NULL) {
@@ -67,7 +67,7 @@ void LinBusListener::uartEventTask_(void *args) {
   LinBusListener *instance = (LinBusListener *) args;
   auto uartComp = static_cast<ESPHOME_UART *>(instance->parent_);
   auto uart_num = uartComp->get_hw_serial_number();
-  auto uartEventQueue = uartComp->get_uart_event_queue();
+  auto uartEventQueue = uartComp->get_event_queue();
   uart_event_t event;
   for (;;) {
     // Waiting for UART event.
