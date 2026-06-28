@@ -13,12 +13,14 @@ enum class HeatingMode : uint16_t {
   HEATING_MODE_HIGH = 0xA,
   HEATING_MODE_BOOST = 0xB,
 };
+inline uint16_t operator+(HeatingMode v) { return static_cast<uint16_t>(v); }
 
 enum class ElectricPowerLevel : uint16_t {
   ELECTRIC_POWER_LEVEL_0 = 0,
   ELECTRIC_POWER_LEVEL_900 = 900,
   ELECTRIC_POWER_LEVEL_1800 = 1800,
 };
+inline uint16_t operator+(ElectricPowerLevel v) { return static_cast<uint16_t>(v); }
 
 enum class TargetTemp : uint16_t {
   TARGET_TEMP_OFF = 0x0,
@@ -59,6 +61,7 @@ enum class TargetTemp : uint16_t {
   TARGET_TEMP_AIRCON_AUTO_MIN = (18 + 273) * 10,
   TARGET_TEMP_AIRCON_AUTO_MAX = (25 + 273) * 10,
 };
+inline uint16_t operator+(TargetTemp v) { return static_cast<uint16_t>(v); }
 
 enum class EnergyMix : uint8_t {
   ENERGY_MIX_NONE = 0b00,
@@ -67,6 +70,7 @@ enum class EnergyMix : uint8_t {
   ENERGY_MIX_ELECTRICITY = 0b10,
   ENERGY_MIX_MIX = 0b11,
 };
+inline uint8_t operator+(EnergyMix v) { return static_cast<uint8_t>(v); }
 
 enum class OperatingStatus : uint8_t {
   OPERATING_STATUS_UNSET = 0x0,
