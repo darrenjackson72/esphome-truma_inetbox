@@ -66,12 +66,18 @@ void LinBusListener::setup_framework() {
 void LinBusListener::uartEventTask_(void *args) {
   LinBusListener *instance = (LinBusListener *) args;
   auto uartComp = static_cast<ESPHOME_UART *>(instance->parent_);
-  auto uart_num = uartComp->get_hw_serial_number();
-  auto uartEventQueue = uartComp->get_event_queue();
+  uart_port_t uart_num = static_cast<uart_port_t>(uartComp->get_hw_serial_number());
+
+  // ESPHome 2026.x removed get_event_queue() from IDFUARTComponent.
+  // Re-install the UART driver with our own event queue to restore this functionality.
+  QueueHandle_t uartEventQueue;
+  uart_driver_delete(uart_num);
+  uart_driver_install(uart_num, 256 * 2, 0, 20, &uartEventQueue, 0);
+
   uart_event_t event;
   for (;;) {
     // Waiting for UART event.
-    if (xQueueReceive(*uartEventQueue, (void *) &event, QUEUE_WAIT_BLOCKING)) {
+    if (xQueueReceive(uartEventQueue, (void *) &event, QUEUE_WAIT_BLOCKING)) {
       if (event.type == UART_DATA && instance->available() > 0) {
         instance->onReceive_();
       } else if (event.type == UART_BREAK) {
