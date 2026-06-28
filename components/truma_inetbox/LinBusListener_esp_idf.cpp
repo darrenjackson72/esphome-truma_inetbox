@@ -99,4 +99,4 @@ void LinBusListener::eventTask_(void *args) {
 #undef QUEUE_WAIT_BLOCKING
 #undef ESPHOME_UART
 
-#endif  // USE_ESP32_FRAMEWORK_ESP_IDF
+#endif  // USE_ESP32_FRAMEWORK_ESP_IDF// ESPHome 2026.6.x fix
