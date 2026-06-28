@@ -291,3 +291,4 @@ Edit `DEVICE_HOST`, `DEVICE_PORT`, and `NOISE_PSK` at the top of `test_harness.p
 - [x] Clock sync from Home Assistant
 - [x] Ember OneControl BLE integration with bond persistence
 - [x] Ember: lights, tanks, water pump, slide, awning
+# ESPHome 2026.6.x compatible fork
