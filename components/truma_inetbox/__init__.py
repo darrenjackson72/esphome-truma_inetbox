@@ -292,82 +292,66 @@ TimerActivateAction = truma_inetbox_ns.class_(
     "TimerActivateAction", automation.Action)
 WriteTimeAction = truma_inetbox_ns.class_("WriteTimeAction", automation.Action)
 
-# `EnergyMix` is a enum class and not a namespace but it works.
-EnergyMix_dummy_ns = truma_inetbox_ns.namespace("EnergyMix")
-
-CONF_SUPPORTED_ENERGY_MIX = {
-    "NONE": EnergyMix_dummy_ns.ENERGY_MIX_NONE,
-    "GAS": EnergyMix_dummy_ns.ENERGY_MIX_GAS,
-    "DIESEL": EnergyMix_dummy_ns.ENERGY_MIX_DIESEL,
-    "ELECTRICITY": EnergyMix_dummy_ns.ENERGY_MIX_ELECTRICITY,
-    "MIX": EnergyMix_dummy_ns.ENERGY_MIX_MIX,
-}
-
-# `ElectricPowerLevel` is a enum class and not a namespace but it works.
-ElectricPowerLevel_dummy_ns = truma_inetbox_ns.namespace("ElectricPowerLevel")
-
-CONF_SUPPORTED_ELECTRIC_POWER_LEVEL = {
-    "0": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_0,
-    "0W": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_0,
-    "0 W": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_0,
-    "900": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_900,
-    "900W": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_900,
-    "900 W": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_900,
-    "1800": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800,
-    "1800W": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800,
-    "1800 W": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800,
-    "1.8kW": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800,
-    "1,8kW": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800,
-    "1.8 kW": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800,
-    "1,8 kW": ElectricPowerLevel_dummy_ns.ELECTRIC_POWER_LEVEL_1800,
-}
-
-# `HeatingMode` is a enum class and not a namespace but it works.
-HeatingMode_dummy_ns = truma_inetbox_ns.namespace("HeatingMode")
-
+# Use plain integers so ESPHome codegen emits integer literals in lambdas,
+# avoiding C++ enum-to-integer implicit conversion errors in ESPHome 2026.x
 CONF_SUPPORTED_HEATING_MODE = {
-    "OFF": HeatingMode_dummy_ns.HEATING_MODE_OFF,
-    "ECO": HeatingMode_dummy_ns.HEATING_MODE_ECO,
-    "NIGHT": HeatingMode_dummy_ns.HEATING_MODE_VARIO_HEAT_NIGHT,
-    "AUTO": HeatingMode_dummy_ns.HEATING_MODE_VARIO_HEAT_AUTO,
-    "HIGH": HeatingMode_dummy_ns.HEATING_MODE_HIGH,
-    "BOOST": HeatingMode_dummy_ns.HEATING_MODE_BOOST,
+    "OFF": 0x0,
+    "ECO": 0x1,
+    "NIGHT": 0x2,
+    "AUTO": 0x3,
+    "HIGH": 0xA,
+    "BOOST": 0xB,
 }
-
-# `TargetTemp` is a enum class and not a namespace but it works.
-TargetTemp_dummy_ns = truma_inetbox_ns.namespace("TargetTemp")
 
 CONF_SUPPORTED_WATER_TEMPERATURE = {
-    "OFF": TargetTemp_dummy_ns.TARGET_TEMP_OFF,
-    "ECO": TargetTemp_dummy_ns.TARGET_TEMP_WATER_ECO,
-    "HIGH": TargetTemp_dummy_ns.TARGET_TEMP_WATER_HIGH,
-    "BOOST": TargetTemp_dummy_ns.TARGET_TEMP_WATER_BOOST,
+    "OFF": 0,
+    "ECO": (40 + 273) * 10,
+    "HIGH": (60 + 273) * 10,
+    "BOOST": (200 + 273) * 10,
 }
 
-# `AirconMode` is a enum class and not a namespace but it works.
-AirconMode_dummy_ns = truma_inetbox_ns.namespace("AirconMode")
+CONF_SUPPORTED_ENERGY_MIX = {
+    "NONE": 0b00,
+    "GAS": 0b01,
+    "DIESEL": 0b01,
+    "ELECTRICITY": 0b10,
+    "MIX": 0b11,
+}
+
+CONF_SUPPORTED_ELECTRIC_POWER_LEVEL = {
+    "0": 0,
+    "0W": 0,
+    "0 W": 0,
+    "900": 900,
+    "900W": 900,
+    "900 W": 900,
+    "1800": 1800,
+    "1800W": 1800,
+    "1800 W": 1800,
+    "1.8kW": 1800,
+    "1,8kW": 1800,
+    "1.8 kW": 1800,
+    "1,8 kW": 1800,
+}
 
 CONF_SUPPORTED_AIRCON_MODE = {
-    "OFF": AirconMode_dummy_ns.AIRCON_MODE_OFF,
-    "VENTILATION": AirconMode_dummy_ns.AIRCON_MODE_VENTILATION,
-    "VENT": AirconMode_dummy_ns.AIRCON_MODE_VENTILATION,
-    "COOLING": AirconMode_dummy_ns.AIRCON_MODE_COOLING,
-    "COOL": AirconMode_dummy_ns.AIRCON_MODE_COOLING,
-    "HEATING": AirconMode_dummy_ns.AIRCON_MODE_HEATING,
-    "HEAT": AirconMode_dummy_ns.AIRCON_MODE_HEATING,
-    "AUTO": AirconMode_dummy_ns.AIRCON_MODE_AUTO,
+    "OFF": 0x00,
+    "VENTILATION": 0x04,
+    "VENT": 0x04,
+    "COOLING": 0x05,
+    "COOL": 0x05,
+    "HEATING": 0x06,
+    "HEAT": 0x06,
+    "AUTO": 0x07,
 }
 
-# `AirconVentMode` is a enum class and not a namespace but it works.
-AirconVentMode_dummy_ns = truma_inetbox_ns.namespace("AirconVentMode")
-
 CONF_SUPPORTED_AIRCON_VENT_MODE = {
-    "LOW": AirconVentMode_dummy_ns.AIRCON_VENT_LOW,
-    "MID": AirconVentMode_dummy_ns.AIRCON_VENT_MID,
-    "MEDIUM": AirconVentMode_dummy_ns.AIRCON_VENT_MID,
-    "HIGH": AirconVentMode_dummy_ns.AIRCON_VENT_HIGH,
-    "NIGHT": AirconVentMode_dummy_ns.AIRCON_VENT_NIGHT,
-    "AUTO": AirconVentMode_dummy_ns.AIRCON_VENT_AUTO,
+    "LOW": 0x71,
+    "MID": 0x72,
+    "MEDIUM": 0x72,
+    "HIGH": 0x73,
+    "NIGHT": 0x74,
+    "AUTO": 0x77,
 }
 
 CONF_AIRCON_MODE = "mode"
