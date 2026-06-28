@@ -1,633 +1,118 @@
-from typing import Optional
-
-import esphome.codegen as cg
+from esphome.components import select
 import esphome.config_validation as cv
-import esphome.final_validate as fv
-from esphome import pins, automation
-from esphome.components import uart, time
+import esphome.codegen as cg
 from esphome.const import (
     CONF_ID,
-    CONF_NUMBER,
-    CONF_BAUD_RATE,
-    CONF_UART_ID,
-    CONF_RX_PIN,
-    CONF_TX_PIN,
-    CONF_INVERTED,
-    CONF_CS_PIN,
-    CONF_TEMPERATURE,
-    CONF_TRIGGER_ID,
-    CONF_STOP,
-    CONF_TIME_ID,
-    CONF_TIME,
+    CONF_TYPE,
+    CONF_ICON,
+    CONF_OPTIONS,
+    ICON_THERMOMETER,
+    CONF_ENTITY_CATEGORY,
+    CONF_DISABLED_BY_DEFAULT,
 )
-from esphome.components.uart import (
-    CONF_STOP_BITS,
-    CONF_DATA_BITS,
-    CONF_PARITY,
-    KEY_UART_DEVICES,
-)
-from esphome.core import CORE
-from .entity_helpers import count_id_usage
+from .. import truma_inetbox_ns, CONF_TRUMA_INETBOX_ID, TrumaINetBoxApp
 
-DEPENDENCIES = ["uart", "number"]
+DEPENDENCIES = ["truma_inetbox"]
 CODEOWNERS = ["@Fabian-Schmidt"]
 
-CONF_TRUMA_INETBOX_ID = "truma_inetbox_id"
-CONF_LIN_CHECKSUM = "lin_checksum"
-CONF_FAULT_PIN = "fault_pin"
-CONF_OBSERVER_MODE = "observer_mode"
-CONF_DEBUG = "debug"
-CONF_NUMBER_OF_CHILDREN = "number_of_children"
-CONF_ON_HEATER_MESSAGE = "on_heater_message"
+CONF_CLASS = "class"
 
-truma_inetbox_ns = cg.esphome_ns.namespace("truma_inetbox")
-StatusFrameHeater = truma_inetbox_ns.struct("StatusFrameHeater")
-StatusFrameHeaterConstPtr = StatusFrameHeater.operator("ptr").operator("const")
-TrumaINetBoxApp = truma_inetbox_ns.class_(
-    "TrumaiNetBoxApp", cg.PollingComponent, uart.UARTDevice
-)
-TrumaiNetBoxAppHeaterMessageTrigger = truma_inetbox_ns.class_(
-    "TrumaiNetBoxAppHeaterMessageTrigger",
-    automation.Trigger.template(StatusFrameHeaterConstPtr),
-)
+TrumaSelect = truma_inetbox_ns.class_(
+    "TrumaSelect", select.Select, cg.Component)
 
-# `LIN_CHECKSUM` is a enum class and not a namespace but it works.
-LIN_CHECKSUM_dummy_ns = truma_inetbox_ns.namespace("LIN_CHECKSUM")
+# `TRUMA_SELECT_TYPE` is a enum class and not a namespace but it works.
+TRUMA_SELECT_TYPE_dummy_ns = truma_inetbox_ns.namespace("TRUMA_SELECT_TYPE")
 
-CONF_SUPPORTED_LIN_CHECKSUM = {
-    "VERSION_1": LIN_CHECKSUM_dummy_ns.LIN_CHECKSUM_VERSION_1,
-    "VERSION_2": LIN_CHECKSUM_dummy_ns.LIN_CHECKSUM_VERSION_2,
-}
-
-CONF_RP2040_HARDWARE_UART = {
-    CONF_TX_PIN: {
-        0: 0,
-        12: 0,
-        16: 0,
-        28: 0,
-        4: 1,
-        8: 1,
-        20: 1,
-        24: 1,
+CONF_SUPPORTED_TYPE = {
+    "HEATER_FAN_MODE_COMBI": {
+        CONF_CLASS: truma_inetbox_ns.class_("TrumaHeaterSelect", select.Select, cg.Component),
+        CONF_TYPE: TRUMA_SELECT_TYPE_dummy_ns.HEATER_FAN_MODE,
+        CONF_ICON: ICON_THERMOMETER,
+        CONF_OPTIONS: ("Off", "Eco", "High", "Boost"),
     },
-    CONF_RX_PIN: {
-        1: 0,
-        13: 0,
-        17: 0,
-        29: 0,
-        5: 1,
-        9: 1,
-        21: 1,
-        25: 1,
-    }
+    "HEATER_FAN_MODE_VARIO_HEAT": {
+        CONF_CLASS: truma_inetbox_ns.class_("TrumaHeaterSelect", select.Select, cg.Component),
+        CONF_TYPE: TRUMA_SELECT_TYPE_dummy_ns.HEATER_FAN_MODE,
+        CONF_ICON: ICON_THERMOMETER,
+        CONF_OPTIONS: ("Off", "Night", "Auto", "Boost"),
+    },
+    "HEATER_ENERGY_MIX_GAS": {
+        CONF_CLASS: truma_inetbox_ns.class_("TrumaHeaterSelect", select.Select, cg.Component),
+        CONF_TYPE: TRUMA_SELECT_TYPE_dummy_ns.HEATER_ENERGY_MIX,
+        CONF_ICON: ICON_THERMOMETER,
+        CONF_OPTIONS: ("Gas", "Mix 1", "Mix 2", "Electric 1", "Electric 2"),
+    },
+    "HEATER_ENERGY_MIX_DIESEL": {
+        CONF_CLASS: truma_inetbox_ns.class_("TrumaHeaterSelect", select.Select, cg.Component),
+        CONF_TYPE: TRUMA_SELECT_TYPE_dummy_ns.HEATER_ENERGY_MIX,
+        CONF_ICON: ICON_THERMOMETER,
+        CONF_OPTIONS: ("Diesel", "Mix 1", "Mix 2", "Electric 1", "Electric 2"),
+    },
+    "HEATER_ENERGY_MIX_PROPANE": {
+        CONF_CLASS: truma_inetbox_ns.class_("TrumaHeaterSelect", select.Select, cg.Component),
+        CONF_TYPE: TRUMA_SELECT_TYPE_dummy_ns.HEATER_ENERGY_MIX,
+        CONF_ICON: ICON_THERMOMETER,
+        CONF_OPTIONS: ("Propane", "Mix 1", "Mix 2", "Electric 1", "Electric 2"),
+    },
+    "AIRCON_MODE": {
+        CONF_CLASS: truma_inetbox_ns.class_("TrumaAirconSelect", select.Select, cg.Component),
+        CONF_TYPE: TRUMA_SELECT_TYPE_dummy_ns.AIRCON_MODE,
+        CONF_ICON: "mdi:air-conditioner",
+        CONF_OPTIONS: ("Off", "Ventilation", "Cooling", "Heating", "Auto"),
+    },
+    "AIRCON_VENT_MODE": {
+        CONF_CLASS: truma_inetbox_ns.class_("TrumaAirconSelect", select.Select, cg.Component),
+        CONF_TYPE: TRUMA_SELECT_TYPE_dummy_ns.AIRCON_VENT_MODE,
+        CONF_ICON: "mdi:fan",
+        CONF_OPTIONS: ("Low", "Mid", "High", "Night", "Auto"),
+    },
 }
 
 
-def final_validate_device_schema(
-    name: str,
-    *,
-    baud_rate: Optional[int] = None,
-    require_tx: bool = False,
-    require_rx: bool = False,
-    stop_bits: Optional[int] = None,
-    data_bits: Optional[int] = None,
-    parity: str = None,
-    require_hardware_uart: Optional[bool] = None,
-):
-    def validate_baud_rate(value):
-        if value != baud_rate:
-            raise cv.Invalid(
-                f"Component {name} required baud rate {baud_rate} for the uart bus"
-            )
-        return value
+def set_default_based_on_type():
+    def set_defaults_(config):
+        type_key = config[CONF_TYPE].upper()
+        type_data = CONF_SUPPORTED_TYPE[type_key]
 
-    def validate_pin(opt, device):
-        def validator(value):
-            if opt in device:
-                raise cv.Invalid(
-                    f"The uart {opt} is used both by {name} and {device[opt]}, "
-                    f"but can only be used by one. Please create a new uart bus for {name}."
-                )
-            device[opt] = name
-            return value
+        config[CONF_ID].type = type_data[CONF_CLASS]
 
-        return validator
+        if CONF_ICON not in config:
+            config[CONF_ICON] = type_data[CONF_ICON]
 
-    def validate_stop_bits(value):
-        if value != stop_bits:
-            raise cv.Invalid(
-                f"Component {name} required stop bits {stop_bits} for the uart bus"
-            )
-        return value
+        if CONF_OPTIONS not in config:
+            config[CONF_OPTIONS] = type_data[CONF_OPTIONS]
 
-    def validate_data_bits(value):
-        if value != data_bits:
-            raise cv.Invalid(
-                f"Component {name} required data bits {data_bits} for the uart bus"
-            )
-        return value
-
-    def validate_parity(value):
-        if value != parity:
-            raise cv.Invalid(
-                f"Component {name} required parity {parity} for the uart bus"
-            )
-        return value
-
-    def validate_hardware_uart(opt, opt2=None, declaration_config=None):
-        def validator(value):
-            if (CORE.is_rp2040):
-                if value[CONF_INVERTED]:
-                    raise cv.Invalid(
-                        f"Component {name} required Hardware UART. Inverted is not supported by Hardware UART.")
-                if value[CONF_NUMBER] not in CONF_RP2040_HARDWARE_UART[opt]:
-                    raise cv.Invalid(
-                        f"Component {name} required Hardware UART. {opt} is not a Hardware UART pin.")
-                if opt2 and declaration_config and CONF_RP2040_HARDWARE_UART[opt2][declaration_config[opt2][CONF_NUMBER]] != CONF_RP2040_HARDWARE_UART[opt][value[CONF_NUMBER]]:
-                    raise cv.Invalid(
-                        f"Component {name} required Hardware UART. {opt} and {opt2} are not a matching Hardware UART pin set.")
-
-            return value
-        return validator
-
-    def validate_hub(hub_config):
-        hub_schema = {}
-        uart_id = hub_config[CONF_ID]
-        devices = fv.full_config.get().data.setdefault(KEY_UART_DEVICES, {})
-        device = devices.setdefault(uart_id, {})
-
-        if require_tx:
-            hub_schema[
-                cv.Required(
-                    CONF_TX_PIN,
-                    msg=f"Component {name} requires this uart bus to declare a tx_pin",
-                )
-            ] = validate_pin(CONF_TX_PIN, device)
-        if require_rx:
-            hub_schema[
-                cv.Required(
-                    CONF_RX_PIN,
-                    msg=f"Component {name} requires this uart bus to declare a rx_pin",
-                )
-            ] = validate_pin(CONF_RX_PIN, device)
-        if baud_rate is not None:
-            hub_schema[cv.Required(CONF_BAUD_RATE)] = validate_baud_rate
-        if stop_bits is not None:
-            hub_schema[cv.Required(CONF_STOP_BITS)] = validate_stop_bits
-        if data_bits is not None:
-            hub_schema[cv.Required(CONF_DATA_BITS)] = validate_data_bits
-        if parity is not None:
-            hub_schema[cv.Required(CONF_PARITY)] = validate_parity
-        if require_hardware_uart is not None:
-            fconf = fv.full_config.get()
-            path = fconf.get_path_for_id(uart_id)[:-1]
-            declaration_config = fconf.get_config_for_path(path)
-            hub_schema[cv.Required(CONF_TX_PIN)] = validate_hardware_uart(
-                CONF_TX_PIN)
-            hub_schema[cv.Required(CONF_RX_PIN)] = validate_hardware_uart(
-                CONF_RX_PIN, CONF_TX_PIN, declaration_config)
-        return cv.Schema(hub_schema, extra=cv.ALLOW_EXTRA)(hub_config)
-
-    return cv.Schema(
-        {cv.Required(CONF_UART_ID)
-                     : fv.id_declaration_match_schema(validate_hub)},
-        extra=cv.ALLOW_EXTRA,
-    )
+        return config
+    return set_defaults_
 
 
-CONFIG_SCHEMA = cv.All(
-    cv.Schema(
-        {
-            cv.GenerateID(): cv.declare_id(TrumaINetBoxApp),
-            cv.Optional(CONF_TIME_ID): cv.use_id(time.RealTimeClock),
-            cv.Optional(CONF_LIN_CHECKSUM, "VERSION_2"): cv.enum(CONF_SUPPORTED_LIN_CHECKSUM, upper=True),
-            cv.Optional(CONF_CS_PIN): pins.gpio_output_pin_schema,
-            cv.Optional(CONF_FAULT_PIN): pins.gpio_input_pin_schema,
-            cv.Optional(CONF_OBSERVER_MODE): cv.boolean,
-            cv.Optional(CONF_DEBUG, default=False): cv.boolean,
-            cv.Optional(CONF_ON_HEATER_MESSAGE): automation.validate_automation(
-                {
-                    cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(TrumaiNetBoxAppHeaterMessageTrigger),
-                }
-            ),
-        }
-    )
-    .extend(cv.polling_component_schema("500ms"))
-    .extend(uart.UART_DEVICE_SCHEMA),
-    cv.only_on(["esp32", "rp2040"]),
-)
-FINAL_VALIDATE_SCHEMA = cv.All(
-    final_validate_device_schema(
-        "truma_inetbox", baud_rate=9600, require_tx=True, require_rx=True, stop_bits=2, data_bits=8, parity="NONE", require_hardware_uart=True),
-)
+SELECT_SCHEMA_BASE = select.select_schema({})
+
+CONFIG_SCHEMA = cv.Schema({
+    **SELECT_SCHEMA_BASE.schema,
+    cv.GenerateID(): cv.declare_id(TrumaSelect),
+    cv.GenerateID(CONF_TRUMA_INETBOX_ID): cv.use_id(TrumaINetBoxApp),
+    cv.Required(CONF_TYPE): cv.one_of(*CONF_SUPPORTED_TYPE.keys()),
+    cv.Optional(CONF_ICON): cv.icon,
+    cv.Optional(CONF_OPTIONS): cv.All(
+        cv.ensure_list(cv.string_strict), cv.Length(min=1)
+    ),
+    cv.Optional(CONF_ENTITY_CATEGORY): cv.entity_category,
+    cv.Optional(CONF_DISABLED_BY_DEFAULT, default=False): cv.boolean,
+}).extend(cv.COMPONENT_SCHEMA)
+
+
+FINAL_VALIDATE_SCHEMA = set_default_based_on_type()
 
 async def to_code(config):
-    if CORE.using_toolchain_esp_idf:
-        cg.add_build_flag("-DARDUINO_SERIAL_EVENT_TASK_RUNNING_CORE=0")
-        cg.add_build_flag("-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096")
-
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
-    await uart.register_uart_device(var, config)
-    if (CONF_TIME_ID in config):
-        time_ = await cg.get_variable(config[CONF_TIME_ID])
-        cg.add(var.set_time(time_))
-
-    if CONF_LIN_CHECKSUM in config:
-        cg.add(var.set_lin_checksum(
-            CONF_SUPPORTED_LIN_CHECKSUM[config[CONF_LIN_CHECKSUM]]))
-
-    if CONF_CS_PIN in config:
-        pin = await cg.gpio_pin_expression(config[CONF_CS_PIN])
-        cg.add(var.set_cs_pin(pin))
-
-    if CONF_FAULT_PIN in config:
-        pin = await cg.gpio_pin_expression(config[CONF_FAULT_PIN])
-        cg.add(var.set_fault_pin(pin))
-
-    if CONF_OBSERVER_MODE in config:
-        cg.add(var.set_observer_mode(config[CONF_OBSERVER_MODE]))
-
-    if CONF_DEBUG in config:
-        cg.add(var.set_debug_mode(config[CONF_DEBUG]))
-
-    for conf in config.get(CONF_ON_HEATER_MESSAGE, []):
-        trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
-        await automation.build_automation(
-            trigger, [(StatusFrameHeaterConstPtr, "message")], conf
-        )
-
-
-# AUTOMATION
-
-CONF_ENERGY_MIX = "energy_mix"
-CONF_ELECTRIC_POWER_LEVEL = "electric_power_level"
-CONF_HEATING_MODE = "heating_mode"
-CONF_WATT = "watt"
-CONF_START = "start"
-CONF_ROOM_TEMPERATURE = "room_temperature"
-CONF_WATER_TEMPERATURE = "water_temperature"
-
-HeaterRoomTempAction = truma_inetbox_ns.class_(
-    "HeaterRoomTempAction", automation.Action)
-HeaterWaterTempAction = truma_inetbox_ns.class_(
-    "HeaterWaterTempAction", automation.Action)
-HeaterWaterTempEnumAction = truma_inetbox_ns.class_(
-    "HeaterWaterTempEnumAction", automation.Action)
-HeaterElecPowerLevelAction = truma_inetbox_ns.class_(
-    "HeaterElecPowerLevelAction", automation.Action)
-HeaterEnergyMixAction = truma_inetbox_ns.class_(
-    "HeaterEnergyMixAction", automation.Action)
-AirconManualTempAction = truma_inetbox_ns.class_(
-    "AirconManualTempAction", automation.Action)
-AirconManualModeAction = truma_inetbox_ns.class_(
-    "AirconManualModeAction", automation.Action)
-AirconManualVentModeAction = truma_inetbox_ns.class_(
-    "AirconManualVentModeAction", automation.Action)
-AirconManualAction = truma_inetbox_ns.class_(
-    "AirconManualAction", automation.Action)
-TimerDisableAction = truma_inetbox_ns.class_(
-    "TimerDisableAction", automation.Action)
-TimerActivateAction = truma_inetbox_ns.class_(
-    "TimerActivateAction", automation.Action)
-WriteTimeAction = truma_inetbox_ns.class_("WriteTimeAction", automation.Action)
-
-CONF_SUPPORTED_ENERGY_MIX = {
-    "NONE": cg.RawExpression("(uint8_t) esphome::truma_inetbox::EnergyMix::ENERGY_MIX_NONE"),
-    "GAS": cg.RawExpression("(uint8_t) esphome::truma_inetbox::EnergyMix::ENERGY_MIX_GAS"),
-    "DIESEL": cg.RawExpression("(uint8_t) esphome::truma_inetbox::EnergyMix::ENERGY_MIX_DIESEL"),
-    "ELECTRICITY": cg.RawExpression("(uint8_t) esphome::truma_inetbox::EnergyMix::ENERGY_MIX_ELECTRICITY"),
-    "MIX": cg.RawExpression("(uint8_t) esphome::truma_inetbox::EnergyMix::ENERGY_MIX_MIX"),
-}
-
-CONF_SUPPORTED_ELECTRIC_POWER_LEVEL = {
-    "0": cg.RawExpression("(uint16_t) esphome::truma_inetbox::ElectricPowerLevel::ELECTRIC_POWER_LEVEL_0"),
-    "0W": cg.RawExpression("(uint16_t) esphome::truma_inetbox::ElectricPowerLevel::ELECTRIC_POWER_LEVEL_0"),
-    "0 W": cg.RawExpression("(uint16_t) esphome::truma_inetbox::ElectricPowerLevel::ELECTRIC_POWER_LEVEL_0"),
-    "900": cg.RawExpression("(uint16_t) esphome::truma_inetbox::ElectricPowerLevel::ELECTRIC_POWER_LEVEL_900"),
-    "900W": cg.RawExpression("(uint16_t) esphome::truma_inetbox::ElectricPowerLevel::ELECTRIC_POWER_LEVEL_900"),
-    "900 W": cg.RawExpression("(uint16_t) esphome::truma_inetbox::ElectricPowerLevel::ELECTRIC_POWER_LEVEL_900"),
-    "1800": cg.RawExpression("(uint16_t) esphome::truma_inetbox::ElectricPowerLevel::ELECTRIC_POWER_LEVEL_1800"),
-    "1800W": cg.RawExpression("(uint16_t) esphome::truma_inetbox::ElectricPowerLevel::ELECTRIC_POWER_LEVEL_1800"),
-    "1800 W": cg.RawExpression("(uint16_t) esphome::truma_inetbox::ElectricPowerLevel::ELECTRIC_POWER_LEVEL_1800"),
-    "1.8kW": cg.RawExpression("(uint16_t) esphome::truma_inetbox::ElectricPowerLevel::ELECTRIC_POWER_LEVEL_1800"),
-    "1,8kW": cg.RawExpression("(uint16_t) esphome::truma_inetbox::ElectricPowerLevel::ELECTRIC_POWER_LEVEL_1800"),
-    "1.8 kW": cg.RawExpression("(uint16_t) esphome::truma_inetbox::ElectricPowerLevel::ELECTRIC_POWER_LEVEL_1800"),
-    "1,8 kW": cg.RawExpression("(uint16_t) esphome::truma_inetbox::ElectricPowerLevel::ELECTRIC_POWER_LEVEL_1800"),
-}
-
-CONF_SUPPORTED_HEATING_MODE = {
-    "OFF": cg.RawExpression("(uint16_t) esphome::truma_inetbox::HeatingMode::HEATING_MODE_OFF"),
-    "ECO": cg.RawExpression("(uint16_t) esphome::truma_inetbox::HeatingMode::HEATING_MODE_ECO"),
-    "NIGHT": cg.RawExpression("(uint16_t) esphome::truma_inetbox::HeatingMode::HEATING_MODE_VARIO_HEAT_NIGHT"),
-    "AUTO": cg.RawExpression("(uint16_t) esphome::truma_inetbox::HeatingMode::HEATING_MODE_VARIO_HEAT_AUTO"),
-    "HIGH": cg.RawExpression("(uint16_t) esphome::truma_inetbox::HeatingMode::HEATING_MODE_HIGH"),
-    "BOOST": cg.RawExpression("(uint16_t) esphome::truma_inetbox::HeatingMode::HEATING_MODE_BOOST"),
-}
-
-CONF_SUPPORTED_WATER_TEMPERATURE = {
-    "OFF": cg.RawExpression("(uint16_t) esphome::truma_inetbox::TargetTemp::TARGET_TEMP_OFF"),
-    "ECO": cg.RawExpression("(uint16_t) esphome::truma_inetbox::TargetTemp::TARGET_TEMP_WATER_ECO"),
-    "HIGH": cg.RawExpression("(uint16_t) esphome::truma_inetbox::TargetTemp::TARGET_TEMP_WATER_HIGH"),
-    "BOOST": cg.RawExpression("(uint16_t) esphome::truma_inetbox::TargetTemp::TARGET_TEMP_WATER_BOOST"),
-}
-
-CONF_SUPPORTED_AIRCON_MODE = {
-    "OFF": cg.RawExpression("(uint8_t) esphome::truma_inetbox::AirconMode::AIRCON_MODE_OFF"),
-    "VENTILATION": cg.RawExpression("(uint8_t) esphome::truma_inetbox::AirconMode::AIRCON_MODE_VENTILATION"),
-    "VENT": cg.RawExpression("(uint8_t) esphome::truma_inetbox::AirconMode::AIRCON_MODE_VENTILATION"),
-    "COOLING": cg.RawExpression("(uint8_t) esphome::truma_inetbox::AirconMode::AIRCON_MODE_COOLING"),
-    "COOL": cg.RawExpression("(uint8_t) esphome::truma_inetbox::AirconMode::AIRCON_MODE_COOLING"),
-    "HEATING": cg.RawExpression("(uint8_t) esphome::truma_inetbox::AirconMode::AIRCON_MODE_HEATING"),
-    "HEAT": cg.RawExpression("(uint8_t) esphome::truma_inetbox::AirconMode::AIRCON_MODE_HEATING"),
-    "AUTO": cg.RawExpression("(uint8_t) esphome::truma_inetbox::AirconMode::AIRCON_MODE_AUTO"),
-}
-
-CONF_SUPPORTED_AIRCON_VENT_MODE = {
-    "LOW": cg.RawExpression("(uint8_t) esphome::truma_inetbox::AirconVentMode::AIRCON_VENT_LOW"),
-    "MID": cg.RawExpression("(uint8_t) esphome::truma_inetbox::AirconVentMode::AIRCON_VENT_MID"),
-    "MEDIUM": cg.RawExpression("(uint8_t) esphome::truma_inetbox::AirconVentMode::AIRCON_VENT_MID"),
-    "HIGH": cg.RawExpression("(uint8_t) esphome::truma_inetbox::AirconVentMode::AIRCON_VENT_HIGH"),
-    "NIGHT": cg.RawExpression("(uint8_t) esphome::truma_inetbox::AirconVentMode::AIRCON_VENT_NIGHT"),
-    "AUTO": cg.RawExpression("(uint8_t) esphome::truma_inetbox::AirconVentMode::AIRCON_VENT_AUTO"),
-}
-
-CONF_AIRCON_MODE = "mode"
-CONF_AIRCON_VENT_MODE = "vent_mode"
-
-
-@automation.register_action(
-    "truma_inetbox.heater.set_target_room_temperature",
-    HeaterRoomTempAction,
-    automation.maybe_conf(
-        CONF_TEMPERATURE,
-        {
-            cv.GenerateID(): cv.use_id(TrumaINetBoxApp),
-            cv.Required(CONF_TEMPERATURE): cv.templatable(cv.int_range(min=0, max=30)),
-            cv.Optional(CONF_HEATING_MODE, "OFF"): cv.templatable(cv.enum(CONF_SUPPORTED_HEATING_MODE, upper=True)),
-        }
-    ),
-)
-async def truma_inetbox_heater_set_target_room_temperature_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-
-    template_ = await cg.templatable(config[CONF_TEMPERATURE], args, cg.uint8)
-    cg.add(var.set_temperature(template_))
-
-    template_ = await cg.templatable(config[CONF_HEATING_MODE], args, cg.uint16)
-    cg.add(var.set_heating_mode(template_))
-
-    return var
-
-
-@automation.register_action(
-    "truma_inetbox.heater.set_target_water_temperature",
-    HeaterWaterTempAction,
-    automation.maybe_conf(
-        CONF_TEMPERATURE,
-        {
-            cv.GenerateID(): cv.use_id(TrumaINetBoxApp),
-            cv.Required(CONF_TEMPERATURE): cv.templatable(cv.int_range(min=0, max=80)),
-        }
-    ),
-)
-async def truma_inetbox_heater_set_target_water_temperature_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-
-    template_ = await cg.templatable(config[CONF_TEMPERATURE], args, cg.uint8)
-    cg.add(var.set_temperature(template_))
-
-    return var
-
-
-@automation.register_action(
-    "truma_inetbox.heater.set_target_water_temperature_enum",
-    HeaterWaterTempEnumAction,
-    automation.maybe_conf(
-        CONF_TEMPERATURE,
-        {
-            cv.GenerateID(): cv.use_id(TrumaINetBoxApp),
-            cv.Required(CONF_TEMPERATURE): cv.templatable(cv.enum(CONF_SUPPORTED_WATER_TEMPERATURE, upper=True))
-        }
-    ),
-)
-async def truma_inetbox_heater_set_target_water_temperature_enum_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-
-    template_ = await cg.templatable(config[CONF_TEMPERATURE], args, cg.uint16)
-    cg.add(var.set_temperature(template_))
-
-    return var
-
-
-@automation.register_action(
-    "truma_inetbox.heater.set_electric_power_level",
-    HeaterElecPowerLevelAction,
-    automation.maybe_conf(
-        CONF_WATT,
-        {
-            cv.GenerateID(): cv.use_id(TrumaINetBoxApp),
-            cv.Required(CONF_WATT): cv.templatable(cv.int_range(min=0, max=1800))
-        }
-    ),
-)
-async def truma_inetbox_heater_set_electric_power_level_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-
-    template_ = await cg.templatable(config[CONF_WATT], args, cg.uint16)
-    cg.add(var.set_watt(template_))
-
-    return var
-
-
-@automation.register_action(
-    "truma_inetbox.heater.set_energy_mix",
-    HeaterEnergyMixAction,
-    cv.Schema(
-        {
-            cv.GenerateID(): cv.use_id(TrumaINetBoxApp),
-            cv.Required(CONF_ENERGY_MIX): cv.templatable(cv.enum(CONF_SUPPORTED_ENERGY_MIX, upper=True)),
-            cv.Optional(CONF_WATT, 0): cv.templatable(cv.enum(CONF_SUPPORTED_ELECTRIC_POWER_LEVEL, upper=True)),
-        }
-    ),
-)
-async def truma_inetbox_heater_set_energy_mix_level_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-
-    template_ = await cg.templatable(config[CONF_ENERGY_MIX], args, cg.uint8)
-    cg.add(var.set_energy_mix(template_))
-
-    template_ = await cg.templatable(config[CONF_WATT], args, cg.uint16)
-    cg.add(var.set_watt(template_))
-
-    return var
-
-
-@automation.register_action(
-    "truma_inetbox.aircon.manual.set_target_temperature",
-    AirconManualTempAction,
-    automation.maybe_conf(
-        CONF_TEMPERATURE,
-        {
-            cv.GenerateID(): cv.use_id(TrumaINetBoxApp),
-            cv.Required(CONF_TEMPERATURE): cv.templatable(cv.int_range(min=0, max=31)),
-        }
-    ),
-)
-async def truma_inetbox_aircon_manual_set_target_temperature_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-
-    template_ = await cg.templatable(config[CONF_TEMPERATURE], args, cg.uint8)
-    cg.add(var.set_temperature(template_))
-
-    return var
-
-
-@automation.register_action(
-    "truma_inetbox.aircon.manual.set_mode",
-    AirconManualModeAction,
-    automation.maybe_conf(
-        CONF_AIRCON_MODE,
-        {
-            cv.GenerateID(): cv.use_id(TrumaINetBoxApp),
-            cv.Required(CONF_AIRCON_MODE): cv.templatable(cv.enum(CONF_SUPPORTED_AIRCON_MODE, upper=True)),
-        }
-    ),
-)
-async def truma_inetbox_aircon_manual_set_mode_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-
-    template_ = await cg.templatable(config[CONF_AIRCON_MODE], args, cg.uint8)
-    cg.add(var.set_mode(template_))
-
-    return var
-
-
-@automation.register_action(
-    "truma_inetbox.aircon.manual.set_vent_mode",
-    AirconManualVentModeAction,
-    automation.maybe_conf(
-        CONF_AIRCON_VENT_MODE,
-        {
-            cv.GenerateID(): cv.use_id(TrumaINetBoxApp),
-            cv.Required(CONF_AIRCON_VENT_MODE): cv.templatable(cv.enum(CONF_SUPPORTED_AIRCON_VENT_MODE, upper=True)),
-        }
-    ),
-)
-async def truma_inetbox_aircon_manual_set_vent_mode_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-
-    template_ = await cg.templatable(config[CONF_AIRCON_VENT_MODE], args, cg.uint8)
-    cg.add(var.set_vent_mode(template_))
-
-    return var
-
-
-@automation.register_action(
-    "truma_inetbox.aircon.manual.set",
-    AirconManualAction,
-    cv.Schema(
-        {
-            cv.GenerateID(): cv.use_id(TrumaINetBoxApp),
-            cv.Optional(CONF_TEMPERATURE, default=22): cv.templatable(cv.int_range(min=0, max=31)),
-            cv.Optional(CONF_AIRCON_MODE, default="OFF"): cv.templatable(cv.enum(CONF_SUPPORTED_AIRCON_MODE, upper=True)),
-            cv.Optional(CONF_AIRCON_VENT_MODE, default="LOW"): cv.templatable(cv.enum(CONF_SUPPORTED_AIRCON_VENT_MODE, upper=True)),
-        }
-    ),
-)
-async def truma_inetbox_aircon_manual_set_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-
-    template_ = await cg.templatable(config[CONF_TEMPERATURE], args, cg.uint8)
-    cg.add(var.set_temperature(template_))
-
-    template_ = await cg.templatable(config[CONF_AIRCON_MODE], args, cg.uint8)
-    cg.add(var.set_mode(template_))
-
-    template_ = await cg.templatable(config[CONF_AIRCON_VENT_MODE], args, cg.uint8)
-    cg.add(var.set_vent_mode(template_))
-
-    return var
-
-
-@automation.register_action(
-    "truma_inetbox.timer.disable",
-    TimerDisableAction,
-    automation.maybe_simple_id(
-        {
-            cv.GenerateID(): cv.use_id(TrumaINetBoxApp),
-        }
-    ),
-)
-async def truma_inetbox_timer_disable_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-    return var
-
-
-@automation.register_action(
-    "truma_inetbox.timer.activate",
-    TimerActivateAction,
-    automation.maybe_simple_id(
-        {
-            cv.GenerateID(): cv.use_id(TrumaINetBoxApp),
-            cv.Required(CONF_START): cv.templatable(cv.int_range(min=0, max=1440)),
-            cv.Required(CONF_STOP): cv.templatable(cv.int_range(min=0, max=1440)),
-            cv.Required(CONF_ROOM_TEMPERATURE): cv.templatable(cv.int_range(min=0, max=30)),
-            cv.Optional(CONF_HEATING_MODE, "OFF"): cv.templatable(cv.enum(CONF_SUPPORTED_HEATING_MODE, upper=True)),
-            cv.Optional(CONF_WATER_TEMPERATURE, 0): cv.templatable(cv.int_range(min=0, max=80)),
-            cv.Optional(CONF_ENERGY_MIX, "NONE"): cv.templatable(cv.enum(CONF_SUPPORTED_ENERGY_MIX, upper=True)),
-            cv.Optional(CONF_WATT, 0): cv.templatable(cv.enum(CONF_SUPPORTED_ELECTRIC_POWER_LEVEL, upper=True)),
-        }
-    ),
-)
-async def truma_inetbox_timer_activate_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-
-    template_ = await cg.templatable(config[CONF_START], args, cg.uint16)
-    cg.add(var.set_start(template_))
-
-    template_ = await cg.templatable(config[CONF_STOP], args, cg.uint16)
-    cg.add(var.set_stop(template_))
-
-    template_ = await cg.templatable(config[CONF_ROOM_TEMPERATURE], args, cg.uint8)
-    cg.add(var.set_room_temperature(template_))
-
-    template_ = await cg.templatable(config[CONF_HEATING_MODE], args, cg.uint16)
-    cg.add(var.set_heating_mode(template_))
-
-    template_ = await cg.templatable(config[CONF_WATER_TEMPERATURE], args, cg.uint8)
-    cg.add(var.set_water_temperature(template_))
-
-    template_ = await cg.templatable(config[CONF_ENERGY_MIX], args, cg.uint8)
-    cg.add(var.set_energy_mix(template_))
-
-    template_ = await cg.templatable(config[CONF_WATT], args, cg.uint16)
-    cg.add(var.set_watt(template_))
-    return var
-
-
-@automation.register_action(
-    "truma_inetbox.clock.set",
-    WriteTimeAction,
-    automation.maybe_simple_id(
-        {
-            cv.GenerateID(): cv.use_id(TrumaINetBoxApp),
-        },
-        cv.requires_component(CONF_TIME),
-    ),
-)
-async def truma_inetbox_clock_set_to_code(config, action_id, template_arg, args):
-    var = cg.new_Pvariable(action_id, template_arg)
-    await cg.register_parented(var, config[CONF_ID])
-    return var
+    await select.register_select(
+        var,
+        config,
+        options=config[CONF_OPTIONS]
+    )
+    await cg.register_parented(var, config[CONF_TRUMA_INETBOX_ID])
+
+    type_key = config[CONF_TYPE].upper()
+    cg.add(var.set_type(CONF_SUPPORTED_TYPE[type_key][CONF_TYPE]))
