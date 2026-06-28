@@ -1,148 +1,162 @@
 #pragma once
 
-#include "esphome/core/component.h"
-#include "TrumaiNetBoxApp.h"
+#include "esphome/core/helpers.h"
 
 namespace esphome {
 namespace truma_inetbox {
 
-template<typename... Ts> class HeaterRoomTempAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
- public:
-  TEMPLATABLE_VALUE(uint8_t, temperature)
-  TEMPLATABLE_VALUE(uint16_t, heating_mode)
-
-  void play(const Ts &...x) override {
-    this->parent_->get_heater()->action_heater_room(this->temperature_.value_or(x..., 0),
-                                                    (HeatingMode) this->heating_mode_.value_or(x..., (uint16_t) HeatingMode::HEATING_MODE_OFF));
-  }
+enum class HeatingMode : uint16_t {
+  HEATING_MODE_OFF = 0x0,
+  HEATING_MODE_ECO = 0x1,
+  HEATING_MODE_VARIO_HEAT_NIGHT = 0x2,
+  HEATING_MODE_VARIO_HEAT_AUTO = 0x3,
+  HEATING_MODE_HIGH = 0xA,
+  HEATING_MODE_BOOST = 0xB,
 };
 
-template<typename... Ts> class HeaterWaterTempAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
- public:
-  TEMPLATABLE_VALUE(uint8_t, temperature)
-
-  void play(const Ts &...x) override {
-    this->parent_->get_heater()->action_heater_water(this->temperature_.value_or(x..., 0));
-  }
+enum class ElectricPowerLevel : uint16_t {
+  ELECTRIC_POWER_LEVEL_0 = 0,
+  ELECTRIC_POWER_LEVEL_900 = 900,
+  ELECTRIC_POWER_LEVEL_1800 = 1800,
 };
 
-template<typename... Ts> class HeaterWaterTempEnumAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
- public:
-  TEMPLATABLE_VALUE(uint16_t, temperature)
-
-  void play(const Ts &...x) override {
-    this->parent_->get_heater()->action_heater_water((TargetTemp) this->temperature_.value_or(x..., (uint16_t) TargetTemp::TARGET_TEMP_OFF));
-  }
+enum class TargetTemp : uint16_t {
+  TARGET_TEMP_OFF = 0x0,
+  TARGET_TEMP_WATER_ECO = (40 + 273) * 10,
+  TARGET_TEMP_WATER_HIGH = (60 + 273) * 10,
+  TARGET_TEMP_WATER_BOOST = (200 + 273) * 10,
+  TARGET_TEMP_05C = (5 + 273) * 10,
+  TARGET_TEMP_06C = (6 + 273) * 10,
+  TARGET_TEMP_07C = (7 + 273) * 10,
+  TARGET_TEMP_08C = (8 + 273) * 10,
+  TARGET_TEMP_09C = (9 + 273) * 10,
+  TARGET_TEMP_10C = (10 + 273) * 10,
+  TARGET_TEMP_11C = (11 + 273) * 10,
+  TARGET_TEMP_12C = (12 + 273) * 10,
+  TARGET_TEMP_13C = (13 + 273) * 10,
+  TARGET_TEMP_14C = (14 + 273) * 10,
+  TARGET_TEMP_15C = (15 + 273) * 10,
+  TARGET_TEMP_16C = (16 + 273) * 10,
+  TARGET_TEMP_17C = (17 + 273) * 10,
+  TARGET_TEMP_18C = (18 + 273) * 10,
+  TARGET_TEMP_19C = (19 + 273) * 10,
+  TARGET_TEMP_20C = (20 + 273) * 10,
+  TARGET_TEMP_21C = (21 + 273) * 10,
+  TARGET_TEMP_22C = (22 + 273) * 10,
+  TARGET_TEMP_23C = (23 + 273) * 10,
+  TARGET_TEMP_24C = (24 + 273) * 10,
+  TARGET_TEMP_25C = (25 + 273) * 10,
+  TARGET_TEMP_26C = (26 + 273) * 10,
+  TARGET_TEMP_27C = (27 + 273) * 10,
+  TARGET_TEMP_28C = (28 + 273) * 10,
+  TARGET_TEMP_29C = (29 + 273) * 10,
+  TARGET_TEMP_30C = (30 + 273) * 10,
+  TARGET_TEMP_31C = (31 + 273) * 10,
+  TARGET_TEMP_ROOM_MIN = (5 + 273) * 10,
+  TARGET_TEMP_ROOM_MAX = (30 + 273) * 10,
+  TARGET_TEMP_AIRCON_MIN = (16 + 273) * 10,
+  TARGET_TEMP_AIRCON_MAX = (31 + 273) * 10,
+  TARGET_TEMP_AIRCON_AUTO_MIN = (18 + 273) * 10,
+  TARGET_TEMP_AIRCON_AUTO_MAX = (25 + 273) * 10,
 };
 
-template<typename... Ts> class HeaterElecPowerLevelAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
- public:
-  TEMPLATABLE_VALUE(uint16_t, watt)
-
-  void play(const Ts &...x) override {
-    this->parent_->get_heater()->action_heater_electric_power_level(this->watt_.value_or(x..., 0));
-  }
+enum class EnergyMix : uint8_t {
+  ENERGY_MIX_NONE = 0b00,
+  ENERGY_MIX_GAS = 0b01,
+  ENERGY_MIX_DIESEL = 0b01,
+  ENERGY_MIX_ELECTRICITY = 0b10,
+  ENERGY_MIX_MIX = 0b11,
 };
 
-template<typename... Ts> class HeaterEnergyMixAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
- public:
-  TEMPLATABLE_VALUE(uint8_t, energy_mix)
-  TEMPLATABLE_VALUE(uint16_t, watt)
-
-  void play(const Ts &...x) override {
-    this->parent_->get_heater()->action_heater_energy_mix(
-        (EnergyMix) this->energy_mix_.value_or(x..., (uint8_t) EnergyMix::ENERGY_MIX_GAS),
-        (ElectricPowerLevel) this->watt_.value_or(x..., (uint16_t) ElectricPowerLevel::ELECTRIC_POWER_LEVEL_0));
-  }
+enum class OperatingStatus : uint8_t {
+  OPERATING_STATUS_UNSET = 0x0,
+  OPERATING_STATUS_OFF = 0x0,
+  OPERATING_STATUS_WARNING = 0x1,
+  OPERATING_STATUS_START_OR_COOL_DOWN = 0x4,
+  OPERATING_STATUS_ON_5 = 0x5,
+  OPERATING_STATUS_ON_6 = 0x6,
+  OPERATING_STATUS_ON_7 = 0x7,
+  OPERATING_STATUS_ON_8 = 0x8,
+  OPERATING_STATUS_ON_9 = 0x9,
 };
 
-template<typename... Ts> class AirconManualTempAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
- public:
-  TEMPLATABLE_VALUE(uint8_t, temperature)
-
-  void play(const Ts &...x) override {
-    this->parent_->get_aircon_manual()->action_set_temp(this->temperature_.value_or(x..., 0));
-  }
+enum class OperatingUnits : uint8_t {
+  OPERATING_UNITS_CELSIUS = 0x0,
+  OPERATING_UNITS_FAHRENHEIT = 0x1,
 };
 
-template<typename... Ts> class AirconManualModeAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
- public:
-  TEMPLATABLE_VALUE(uint8_t, mode)
-
-  void play(const Ts &...x) override {
-    this->parent_->get_aircon_manual()->action_set_mode((AirconMode) this->mode_.value_or(x..., (uint8_t) AirconMode::AIRCON_MODE_OFF));
-  }
+enum class Language : uint8_t {
+  LANGUAGE_GERMAN = 0x0,
+  LANGUAGE_ENGLISH = 0x1,
+  LANGUAGE_FRENCH = 0x2,
+  LANGUAGE_ITALY = 0x3,
 };
 
-template<typename... Ts> class AirconManualVentModeAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
- public:
-  TEMPLATABLE_VALUE(uint8_t, vent_mode)
-
-  void play(const Ts &...x) override {
-    this->parent_->get_aircon_manual()->action_set_vent_mode(
-        (AirconVentMode) this->vent_mode_.value_or(x..., (uint8_t) AirconVentMode::AIRCON_VENT_LOW));
-  }
+enum class ResponseAckResult : uint8_t {
+  RESPONSE_ACK_RESULT_OKAY = 0x0,
+  RESPONSE_ACK_RESULT_ERROR_INVALID_MSG = 0x2,
+  RESPONSE_ACK_RESULT_ERROR_INVALID_ID = 0x3,
 };
 
-template<typename... Ts> class AirconManualAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
- public:
-  TEMPLATABLE_VALUE(uint8_t, temperature)
-  TEMPLATABLE_VALUE(uint8_t, mode)
-  TEMPLATABLE_VALUE(uint8_t, vent_mode)
-
-  void play(const Ts &...x) override {
-    this->parent_->get_aircon_manual()->action_aircon_manual(
-        this->temperature_.value_or(x..., 22),
-        (AirconMode) this->mode_.value_or(x..., (uint8_t) AirconMode::AIRCON_MODE_OFF),
-        (AirconVentMode) this->vent_mode_.value_or(x..., (uint8_t) AirconVentMode::AIRCON_VENT_LOW));
-  }
+enum class ClockMode : uint8_t {
+  CLOCK_MODE_24H = 0x0,
+  CLOCK_MODE_12H = 0x1,
 };
 
-template<typename... Ts> class TimerDisableAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
- public:
-  void play(const Ts &...x) override { this->parent_->get_timer()->action_timer_disable(); }
+enum class TimerActive : uint8_t {
+  TIMER_ACTIVE_ON = 0x1,
+  TIMER_ACTIVE_OFF = 0x0,
 };
 
-template<typename... Ts> class TimerActivateAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
- public:
-  TEMPLATABLE_VALUE(uint16_t, start)
-  TEMPLATABLE_VALUE(uint16_t, stop)
-  TEMPLATABLE_VALUE(uint8_t, room_temperature)
-  TEMPLATABLE_VALUE(uint16_t, heating_mode)
-  TEMPLATABLE_VALUE(uint8_t, water_temperature)
-  TEMPLATABLE_VALUE(uint8_t, energy_mix)
-  TEMPLATABLE_VALUE(uint16_t, watt)
-
-  void play(const Ts &...x) override {
-    this->parent_->get_timer()->action_timer_activate(
-        this->start_.value(x...), this->stop_.value(x...), this->room_temperature_.value(x...),
-        (HeatingMode) this->heating_mode_.value_or(x..., (uint16_t) HeatingMode::HEATING_MODE_OFF),
-        this->water_temperature_.value_or(x..., 0),
-        (EnergyMix) this->energy_mix_.value_or(x..., (uint8_t) EnergyMix::ENERGY_MIX_NONE),
-        (ElectricPowerLevel) this->watt_.value_or(x..., (uint16_t) ElectricPowerLevel::ELECTRIC_POWER_LEVEL_0));
-  }
+enum class ClockSource : uint8_t {
+  CLOCK_SOURCE_MANUAL = 0x1,
+  CLOCK_SOURCE_PROG = 0x2,
 };
 
-#ifdef USE_TIME
-template<typename... Ts> class WriteTimeAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
- public:
-  void play(const Ts &...x) override { this->parent_->get_clock()->action_write_time(); }
-};
-#endif  // USE_TIME
-
-class TrumaiNetBoxAppHeaterMessageTrigger : public Trigger<const StatusFrameHeater *> {
- public:
-  explicit TrumaiNetBoxAppHeaterMessageTrigger(TrumaiNetBoxApp *parent) {
-    parent->get_heater()->add_on_message_callback([this](const StatusFrameHeater *message) { this->trigger(message); });
-  }
+enum class TRUMA_COMPANY : uint8_t {
+  UNKNOWN = 0x00,
+  TRUMA = 0x1E,
+  ALDE = 0x1A,
 };
 
-class TrumaiNetBoxAppAirconManualMessageTrigger : public Trigger<const StatusFrameAirconManual *> {
- public:
-  explicit TrumaiNetBoxAppAirconManualMessageTrigger(TrumaiNetBoxApp *parent) {
-    parent->get_aircon_manual()->add_on_message_callback(
-        [this](const StatusFrameAirconManual *message) { this->trigger(message); });
-  }
+enum class TRUMA_DEVICE : uint8_t {
+  UNKNOWN = 0x00,
+  AIRCON_DEVICE = 0x01,
+  CPPLUS_COMBI = 0x04,
+  CPPLUS_VARIO = 0x05,
+  HEATER_COMBI4 = 0x02,
+  HEATER_VARIO = 0x03,
+  HEATER_CP6 = 0x05,
+  HEATER_COMBI6D = 0x06,
+};
+
+enum class TRUMA_DEVICE_STATE : uint8_t {
+  OFFLINE = 0x00,
+  ONLINE = 0x01,
+};
+
+enum class AirconMode : uint8_t {
+  AIRCON_MODE_OFF = 0x00,
+  AIRCON_MODE_VENTILATION = 0x04,
+  AIRCON_MODE_COOLING = 0x05,
+  AIRCON_MODE_HEATING = 0x06,
+  AIRCON_MODE_AUTO = 0x07,
+  OFF = 0x00,
+  AC_VENTILATION = 0x04,
+  AC_COOLING = 0x05,
+};
+
+enum class AirconVentMode : uint8_t {
+  AIRCON_VENT_LOW = 0x71,
+  AIRCON_VENT_MID = 0x72,
+  AIRCON_VENT_HIGH = 0x73,
+  AIRCON_VENT_NIGHT = 0x74,
+  AIRCON_VENT_AUTO = 0x77,
+};
+
+enum class AirconOperation : uint8_t {
+  AC_ONLY = 0x71,
+  AUTO = 0x72,
 };
 
 }  // namespace truma_inetbox
