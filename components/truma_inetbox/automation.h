@@ -9,11 +9,11 @@ namespace truma_inetbox {
 template<typename... Ts> class HeaterRoomTempAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
  public:
   TEMPLATABLE_VALUE(uint8_t, temperature)
-  TEMPLATABLE_VALUE(uint8_t, heating_mode)
+  TEMPLATABLE_VALUE(uint16_t, heating_mode)
 
   void play(const Ts &...x) override {
     this->parent_->get_heater()->action_heater_room(this->temperature_.value_or(x..., 0),
-                                                    (HeatingMode) this->heating_mode_.value_or(x..., (uint8_t) HeatingMode::HEATING_MODE_OFF));
+                                                    (HeatingMode) this->heating_mode_.value_or(x..., (uint16_t) HeatingMode::HEATING_MODE_OFF));
   }
 };
 
@@ -28,10 +28,10 @@ template<typename... Ts> class HeaterWaterTempAction : public Action<Ts...>, pub
 
 template<typename... Ts> class HeaterWaterTempEnumAction : public Action<Ts...>, public Parented<TrumaiNetBoxApp> {
  public:
-  TEMPLATABLE_VALUE(uint8_t, temperature)
+  TEMPLATABLE_VALUE(uint16_t, temperature)
 
   void play(const Ts &...x) override {
-    this->parent_->get_heater()->action_heater_water((TargetTemp) this->temperature_.value_or(x..., (uint8_t) TargetTemp::TARGET_TEMP_OFF));
+    this->parent_->get_heater()->action_heater_water((TargetTemp) this->temperature_.value_or(x..., (uint16_t) TargetTemp::TARGET_TEMP_OFF));
   }
 };
 
@@ -108,7 +108,7 @@ template<typename... Ts> class TimerActivateAction : public Action<Ts...>, publi
   TEMPLATABLE_VALUE(uint16_t, start)
   TEMPLATABLE_VALUE(uint16_t, stop)
   TEMPLATABLE_VALUE(uint8_t, room_temperature)
-  TEMPLATABLE_VALUE(uint8_t, heating_mode)
+  TEMPLATABLE_VALUE(uint16_t, heating_mode)
   TEMPLATABLE_VALUE(uint8_t, water_temperature)
   TEMPLATABLE_VALUE(uint8_t, energy_mix)
   TEMPLATABLE_VALUE(uint16_t, watt)
@@ -116,7 +116,7 @@ template<typename... Ts> class TimerActivateAction : public Action<Ts...>, publi
   void play(const Ts &...x) override {
     this->parent_->get_timer()->action_timer_activate(
         this->start_.value(x...), this->stop_.value(x...), this->room_temperature_.value(x...),
-        (HeatingMode) this->heating_mode_.value_or(x..., (uint8_t) HeatingMode::HEATING_MODE_OFF),
+        (HeatingMode) this->heating_mode_.value_or(x..., (uint16_t) HeatingMode::HEATING_MODE_OFF),
         this->water_temperature_.value_or(x..., 0),
         (EnergyMix) this->energy_mix_.value_or(x..., (uint8_t) EnergyMix::ENERGY_MIX_NONE),
         (ElectricPowerLevel) this->watt_.value_or(x..., (uint16_t) ElectricPowerLevel::ELECTRIC_POWER_LEVEL_0));
