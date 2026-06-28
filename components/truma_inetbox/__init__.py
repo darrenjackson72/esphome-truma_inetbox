@@ -59,14 +59,8 @@ CONF_SUPPORTED_LIN_CHECKSUM = {
     "VERSION_2": LIN_CHECKSUM_dummy_ns.LIN_CHECKSUM_VERSION_2,
 }
 
-# [RP2040] Hardware serial of uart validation:
-#   constexpr uint32_t valid_tx_uart_0 = __bitset({0, 12, 16, 28});
-#   constexpr uint32_t valid_tx_uart_1 = __bitset({4, 8, 20, 24});
-#   constexpr uint32_t valid_rx_uart_0 = __bitset({1, 13, 17, 29});
-#   constexpr uint32_t valid_rx_uart_1 = __bitset({5, 9, 21, 25});
 CONF_RP2040_HARDWARE_UART = {
     CONF_TX_PIN: {
-        # Pin : Hardware UART number
         0: 0,
         12: 0,
         16: 0,
@@ -77,7 +71,6 @@ CONF_RP2040_HARDWARE_UART = {
         24: 1,
     },
     CONF_RX_PIN: {
-        # Pin : Hardware UART number
         1: 0,
         13: 0,
         17: 0,
@@ -219,8 +212,6 @@ CONFIG_SCHEMA = cv.All(
             ),
         }
     )
-    # Polling is for presenting data to sensors.
-    # Reading and communication is done in a seperate thread/core.
     .extend(cv.polling_component_schema("500ms"))
     .extend(uart.UART_DEVICE_SCHEMA),
     cv.only_on(["esp32", "rp2040"]),
@@ -232,9 +223,7 @@ FINAL_VALIDATE_SCHEMA = cv.All(
 
 async def to_code(config):
     if CORE.using_toolchain_esp_idf:
-        # Run interrupt on core 0. ESP Home runs on core 1.
         cg.add_build_flag("-DARDUINO_SERIAL_EVENT_TASK_RUNNING_CORE=0")
-        # Default Stack Size is 2048. Not enough for my operation.
         cg.add_build_flag("-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096")
 
     var = cg.new_Pvariable(config[CONF_ID])
@@ -404,7 +393,7 @@ async def truma_inetbox_heater_set_target_room_temperature_to_code(config, actio
     template_ = await cg.templatable(config[CONF_TEMPERATURE], args, cg.uint8)
     cg.add(var.set_temperature(template_))
 
-    template_ = await cg.templatable(config[CONF_HEATING_MODE], args, cg.uint16)
+    template_ = await cg.templatable(config[CONF_HEATING_MODE], args, cg.uint8)  # FIXED: was uint16
     cg.add(var.set_heating_mode(template_))
 
     return var
@@ -446,7 +435,7 @@ async def truma_inetbox_heater_set_target_water_temperature_enum_to_code(config,
     var = cg.new_Pvariable(action_id, template_arg)
     await cg.register_parented(var, config[CONF_ID])
 
-    template_ = await cg.templatable(config[CONF_TEMPERATURE], args, cg.uint16)
+    template_ = await cg.templatable(config[CONF_TEMPERATURE], args, cg.uint8)  # FIXED: was uint16
     cg.add(var.set_temperature(template_))
 
     return var
@@ -616,7 +605,6 @@ async def truma_inetbox_timer_disable_to_code(config, action_id, template_arg, a
             cv.Optional(CONF_WATER_TEMPERATURE, 0): cv.templatable(cv.int_range(min=0, max=80)),
             cv.Optional(CONF_ENERGY_MIX, "NONE"): cv.templatable(cv.enum(CONF_SUPPORTED_ENERGY_MIX, upper=True)),
             cv.Optional(CONF_WATT, 0): cv.templatable(cv.enum(CONF_SUPPORTED_ELECTRIC_POWER_LEVEL, upper=True)),
-
         }
     ),
 )
@@ -633,7 +621,7 @@ async def truma_inetbox_timer_activate_to_code(config, action_id, template_arg, 
     template_ = await cg.templatable(config[CONF_ROOM_TEMPERATURE], args, cg.uint8)
     cg.add(var.set_room_temperature(template_))
 
-    template_ = await cg.templatable(config[CONF_HEATING_MODE], args, cg.uint16)
+    template_ = await cg.templatable(config[CONF_HEATING_MODE], args, cg.uint8)  # FIXED: was uint16
     cg.add(var.set_heating_mode(template_))
 
     template_ = await cg.templatable(config[CONF_WATER_TEMPERATURE], args, cg.uint8)
